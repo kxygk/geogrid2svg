@@ -1,0 +1,27 @@
+{:deps
+ {org.clojure/data.csv
+  {:mvn/version
+   "1.0.1"}
+  ;;
+  kxygk/geogrid
+  {:local/root
+   "../geogrid"}
+  ;;
+  thi.ng/geom
+  {:mvn/version
+   "1.0.0-RC4"}
+  ;;
+  thi.ng/math
+  {:mvn/version
+   "0.3.0"}
+  ;;
+  thi.ng/ndarray
+  {:mvn/version
+   "0.3.2"}
+  ;;
+  thi.ng/color
+  {:mvn/version
+   "1.4.0"}}
+ :paths
+ ["."]
+}
