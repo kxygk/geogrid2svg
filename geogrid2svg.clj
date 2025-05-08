@@ -4,7 +4,6 @@
   (:use geoprim
         geogrid)
   (:require [quickthing]
-            [clojure.data.csv     :as csv]
             [clojure.java.io      :as io]
             [thi.ng.geom
              [core                :as geom]
@@ -21,82 +20,81 @@
   data-to-heatmap-matrix
   "`thing/geom` uses its own matrix type to draw heatmaps.
   Convert our data vector to this matrix type"
-  [given-grid]
-  (->>
-    given-grid
-    normalized-data
-    (#(ndarray/ndarray
-        :float64
-        %
-        (reverse
-          (dimension-pix
-            given-grid))))))
+  [given-grid
+   max-val]
+  (->> (normalized-data given-grid
+                        max-val)
+       (#(ndarray/ndarray
+           :float64
+           %
+           (reverse
+             (dimension-pix
+               given-grid))))))
 
 (defn
   to-heatmap
   "blah blah"
-  ([given-grid]
-   (to-heatmap
-     given-grid
-     {:top    0.0
-      :bottom 0.0
-      :right  0.0
-      :left   0.0}))
-  ([given-grid
-    {:keys [^double
-            top
-            ^double
-            bottom
-            ^double
-            right
-            ^double
-            left]
-     :as overruns}]
-   (let[[^long
-         width-pix
-         ^long
-         height-pix] (dimension-pix
-                       given-grid)
-        [^double
-         eas-res
-         ^double
-         sou-res] (eassou-res
-                    given-grid)]
-     (->
-       {:x-axis (viz/linear-axis
-                  {:domain  [left
-                             (- 
-                               ^long width-pix
+  [given-grid
+   & [{:keys [^double
+              max-val
+              ^double
+              top
+              ^double
+              bottom
+              ^double
+              right
+              ^double
+              left]
+       :or   {max-val nil
+              top    0.0
+              bottom 0.0
+              right  0.0
+              left   0.0}
+       :as   overruns}]]
+  (let[[^long
+        width-pix
+        ^long
+        height-pix] (dimension-pix
+                      given-grid)
+       [^double
+        eas-res
+        ^double
+        sou-res]    (eassou-res
+                   given-grid)]
+    (->
+      {:x-axis (viz/linear-axis
+                 {:domain  [left
+                            (- ^long width-pix
                                ^double right)]
-                   :range   [0
-                             (*
-                               eas-res
-                               (-
-                                 width-pix
-                                 left
-                                 right))]
-                   :visible false})
-        :y-axis (viz/linear-axis
-          {:domain  [top
-                     (-
-                       height-pix
-                       bottom)]
-           :range   [0
-                     (*
-                       sou-res
-                       (-
-                         height-pix
-                         top
-                         bottom))]
-           :visible false})
-        :data   [{:matrix        (data-to-heatmap-matrix
-                                   given-grid)
-                  :value-domain  [-1
-                                  1] ;; max-value is 1.0
-                  :palette       quickthing/red-blue-colors
-                  :palette-scale viz/linear-scale
-                  :layout        viz/svg-heatmap}]}
-       viz/svg-plot2d-cartesian))))
+                  :range   [0
+                            (*
+                              eas-res
+                              (-
+                                width-pix
+                                left
+                                right))]
+                  :visible false})
+       :y-axis (viz/linear-axis
+                 {:domain  [top
+                            (-
+                              height-pix
+                              bottom)]
+                  :range   [0
+                            (*
+                              sou-res
+                              (-
+                                height-pix
+                                top
+                                bottom))]
+                  :visible false})
+       :data   [{:matrix        (data-to-heatmap-matrix given-grid
+                                                        max-val)
+                 :value-domain  [-1
+                                 1] ;; max-value is 1.0
+                 :palette       quickthing/red-blue-colors
+                 :palette-scale viz/linear-scale
+                 :layout        viz/svg-heatmap}]}
+      viz/svg-plot2d-cartesian)))
 ;;.[EXAMPLE]
 #_
 ;; req: `geogrid4image` `geogrid4seq` `svgmaps`
