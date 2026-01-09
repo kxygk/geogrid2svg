@@ -21,8 +21,10 @@
   "`thing/geom` uses its own matrix type to draw heatmaps.
   Convert our data vector to this matrix type"
   [given-grid
+   min-val
    max-val]
   (->> (normalized-data given-grid
+                        min-val
                         max-val)
        (#(ndarray/ndarray
            :float64
@@ -38,18 +40,23 @@
    & [{:keys [^double
               max-val
               ^double
+              min-val
+              ^double
               top
               ^double
               bottom
               ^double
               right
               ^double
-              left]
+              left
+              colormap]
        :or   {max-val nil
+              min-val 0
               top    0.0
               bottom 0.0
               right  0.0
-              left   0.0}
+              left   0.0
+              colormap quickthing/red-blue-colors}
        :as   overruns}]]
   (let[[^long
         width-pix
@@ -88,10 +95,11 @@
                                 bottom))]
                   :visible false})
        :data   [{:matrix        (data-to-heatmap-matrix given-grid
+                                                        min-val
                                                         max-val)
                  :value-domain  [-1
                                  1] ;; max-value is 1.0
-                 :palette       quickthing/red-blue-colors
+                 :palette       colormap #_quickthing/red-blue-colors
                  :palette-scale viz/linear-scale
                  :layout        viz/svg-heatmap}]}
       viz/svg-plot2d-cartesian)))
